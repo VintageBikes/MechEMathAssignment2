@@ -26,65 +26,6 @@ function multinewtonsolver()
 
 end
 
-function X_root = multivariate_Newton(fun,X,solver_params)
-    dxmin = solver_params.dxmin;
-    ftol = solver_params.ftol;
-    dxmax = solver_params.dxmax;
-    max_iter = solver_params.max_iter;
-    approx = solver_params.approx;
-
-    if approx
-        fval = fun(X);
-        J = approximate_Jacobian01(fun,X);
-    else
-        [fval,J] = fun(x);
-    end
-
-    delta_x = 1;
-
-    count = 0;
-
-    while count < max_iter && norm(delta_x) > dxmin && norm(fval) > ftol && norm(delta_x) < dxmax
-        count = count+1;
-        if approx
-        fval = fun(X);
-        J = approximate_Jacobian01(fun,X);
-        else
-        [fval,J] = fun(X);
-        end
-        
-        delta_x = -J\fval;
-
-        X = X + delta_x;
-
-
-    end
-
-    X_root = X;
-
-end
-function J = approximate_Jacobian01(fun,X)
-    f0 = fun(X);
-
-    J = zeros(length(f0),length(X));
-
-    e_n = zeros(length(X),1);
-
-    delta_X = 1e-6;
-
-    for n = 1:length(X)
-        e_n(n) = 1;
-
-        f_plus = fun(X+e_n*delta_X);
-        f_minus = fun(X-e_n*delta_X);
-
-        J(:,n) = (f_plus-f_minus)/(2*delta_X);
-
-
-        e_n(n) = 0;
-    end 
-end
-
 
 
 function [f_out,dfdx] = test_function02(X)
