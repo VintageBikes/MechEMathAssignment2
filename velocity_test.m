@@ -12,15 +12,34 @@ vertex_coords_guess = [[ 0; 50];[ -50; 0];[ -50; 50];[-100; 0];[-100; -50];[ -50
 
 vertex_coords = compute_coords(vertex_coords_guess, leg_params, 0);
 
+%create 4x4 identity matrix and 4x10 of zeros
+I = eye(4);
+ZM = zeros(4,10);
+IZM = [I,ZM];
+
+%create 1x10 of zeros
+ZB = zeros(10,1);
+
 %calculate jacobian of link length error
-J = approximate_Jacobian01(@(X) link_length_error_func(X, leg_params),vertex_coords_guess)
+J = approximate_jacobian(@(X) link_length_error_func(X, leg_params),vertex_coords_guess);
+
+%calculate partial derivative of X1 Y1 X2 Y2
+partial_coord_errors = partial_fixed_coord_error_func(vertex_coords, leg_params, theta);
 
 leg_drawing = initialize_leg_drawing(leg_params);
 axis square; axis([-120, 20, -100, 40]);
 for theta = 0:0.1:100
     vertex_coords = compute_coords(vertex_coords, leg_params, theta);
-    J = approximate_Jacobian01(@(X) link_length_error_func(X, leg_params),vertex_coords)
+    J = approximate_jacobian(@(X) link_length_error_func(X, leg_params),vertex_coords);
+    M = [IZM;J];
+    partial_coord_errors = partial_fixed_coord_error_func(vertex_coords, leg_params, theta);
+    B = [partial_coord_errors;ZB];
+    %use matrix division to calculate the DV/Dtheta
+    dv_dtheta = M\B
+
     update_leg_drawing(vertex_coords, leg_drawing, leg_params);
+    plot()
+ 
     pause(0.01);
 end
 
@@ -54,6 +73,14 @@ function coord_errors = fixed_coord_error_func(vertex_coords, leg_params, theta)
     x2_error = vertex_coords(3) - leg_params.vertex_pos2(1);
     y2_error = vertex_coords(4) - leg_params.vertex_pos2(2);
     coord_errors = [x1_error; y1_error; x2_error; y2_error];
+end
+%function for the partial derivitaves of the defined coordinates
+function partial_coord_errors = partial_fixed_coord_error_func(vertex_coords, leg_params, theta)
+    x1_error = vertex_coords(1) - leg_params.vertex_pos0(1) + leg_params.crank_length * -sin(theta);
+    y1_error = vertex_coords(2) - leg_params.vertex_pos0(2) + leg_params.crank_length * cos(theta);
+    x2_error = 0;
+    y2_error = 0;
+    partial_coord_errors = [x1_error; y1_error; x2_error; y2_error];
 end
 function error_vec = linkage_error_func(vertex_coords, leg_params, theta)
     distance_errors = link_length_error_func(vertex_coords, leg_params);
@@ -100,14 +127,14 @@ end
 
 
 
-%Computes the theta derivatives of each vertex coordinate for the Jansen linkage
-%INPUTS:
-%vertex_coords: a column vector containing the (x,y) coordinates of every vertex
+% Computes the theta derivatives of each vertex coordinate for the Jansen linkage
+% INPUTS:
+% vertex_coords: a column vector containing the (x,y) coordinates of every vertex
 % these are assumed to be legal values that are roots of the error funcs!
-%leg_params: a struct containing the parameters that describe the linkage
-%theta: the current angle of the crank
-%OUTPUTS:
-%dVdtheta: a column vector containing the theta derivates of each vertex coord
+% leg_params: a struct containing the parameters that describe the linkage
+% theta: the current angle of the crank
+% OUTPUTS:
+% dVdtheta: a column vector containing the theta derivates of each vertex coord
 % function dVdtheta = compute_velocities(vertex_coords, leg_params, theta)
 % 
 % end

@@ -2,7 +2,7 @@ function multinewtonsolver()
     X0 = rand(3,1);
 
     [~, J_analytical] = test_function02(X0);
-    J_numerical = approximate_Jacobian01(@test_function02,X0);
+    J_numerical = approximate_jacobian(@test_function02,X0);
 
     solver_params = struct();
     solver_params.dxmin = 1e-10;
