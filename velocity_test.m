@@ -35,7 +35,9 @@ for theta = 0:0.1:100
     partial_coord_errors = partial_fixed_coord_error_func(vertex_coords, leg_params, theta);
     B = [partial_coord_errors;ZB];
     %use matrix division to calculate the DV/Dtheta
-    dv_dtheta = M\B
+    dv_dtheta1 = M\B
+    v_func = @(theta) compute_coords(vertex_coords, leg_params, theta);
+    dv_dtheta2 = approximate_jacobian(v_func, theta)
 
     update_leg_drawing(vertex_coords, leg_drawing, leg_params);
     plot()
