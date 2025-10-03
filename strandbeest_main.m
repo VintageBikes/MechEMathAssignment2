@@ -53,4 +53,7 @@ vertex_coords_guess = [...
 [ -50; -100]... %vertex 7 guess
 ];
 
+
+
+
 strandbeest_leg_drawing(vertex_coords_guess, leg_params)

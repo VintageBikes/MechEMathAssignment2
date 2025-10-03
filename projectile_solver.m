@@ -6,9 +6,9 @@ function projectile_solver()
     solver_params.max_iter = 200;
     solver_params.approx = 1;
 
-    Xguess = [pi/4;11] %Initial guess: 45 degrees and 2 seconds
+    Xguess = [pi/4;11]; %Initial guess: 45 degrees and 2 seconds
 
-    X_root = multivariate_Newton(@collision_function,Xguess,solver_params);
+    X_root = multi_newton_solver(@collision_function,Xguess,solver_params);
 
     disp(X_root);
 
